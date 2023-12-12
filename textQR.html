@@ -67,8 +67,9 @@
               .catch(error => console.error(error));
           }
 
-        function openCamera() {
+       function openCamera() {
     const videoElement = document.getElementById('qr-video');
+    let track = null;
 
     navigator.mediaDevices.getUserMedia({
         video: {
@@ -78,37 +79,47 @@
         .then(stream => {
             videoElement.srcObject = stream;
 
-            const track = stream.getVideoTracks()[0];
+            track = stream.getVideoTracks()[0];
             const imageCapture = new ImageCapture(track);
 
             function scanFrame() {
-                imageCapture.grabFrame()
-                    .then(imageBitmap => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = imageBitmap.width;
-                        canvas.height = imageBitmap.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(imageBitmap, 0, 0);
+                if (track.readyState === 'live') {
+                    imageCapture.grabFrame()
+                        .then(imageBitmap => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = imageBitmap.width;
+                            canvas.height = imageBitmap.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(imageBitmap, 0, 0);
 
-                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        const code = jsQR(imageData.data, imageData.width, imageData.height);
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-                        if (code) {
-                            document.getElementById('qrInput').value = code.data;
-                            stream.getTracks().forEach(track => track.stop());
-                        }
+                            if (code) {
+                                document.getElementById('qrInput').value = code.data;
+                                stream.getTracks().forEach(track => track.stop());
+                            }
 
-                        requestAnimationFrame(scanFrame);
-                    })
-                    .catch(error => console.error(error));
+                            requestAnimationFrame(scanFrame);
+                        })
+                        .catch(error => {
+                            // Handle errors, e.g., log them to the console
+                            console.error('Error grabbing frame:', error);
+                            requestAnimationFrame(scanFrame);
+                        });
+                } else {
+                    console.warn('Video track is not in a live state.');
+                }
             }
 
             requestAnimationFrame(scanFrame);
         })
         .catch(error => {
+            // Handle errors, e.g., log them to the console
             console.error('Error accessing camera:', error);
         });
 }
+
 
     </script>
 
