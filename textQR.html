@@ -23,104 +23,102 @@
     <button onclick="openCamera()">Open Camera</button>
     
     <!-- Add a video element for the camera stream -->
-    
     <video id="qr-video" playsinline autoplay></video>
+
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.988.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js/dist/amazon-cognito-identity.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1"></script> <!-- Add the jsQR library -->
-      
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1"></script>
+
     <script>
         var accesKey ="";
         var qrText = "";
-        
+
         function logQRText() {
             // Get the value from the input field
             qrText = document.getElementById("qrInput").value;
             getKey();
             // Log the value to the console
-            console.log("QR Text: " + qrText);            
+            console.log("QR Text: " + qrText);
         }
 
-        function getKey(){  
-            const url = 'https://ofr5pa7gv3.execute-api.eu-central-1.amazonaws.com/get/get_key'
+        function getKey() {
+            const url = 'https://ofr5pa7gv3.execute-api.eu-central-1.amazonaws.com/get/get_key';
             fetch(url)
-              .then(response => response.json())
-              .then(data => {
-                accesKey = data["key"];
-                console.log("key: " + accesKey);
-                callQR(qrText);
-              })
-              .catch(error => console.error(error));
-          }
+                .then(response => response.json())
+                .then(data => {
+                    accesKey = data["key"];
+                    console.log("key: " + accesKey);
+                    callQR(qrText);
+                })
+                .catch(error => console.error(error));
+        }
 
-        function callQR(qr){  
-            const apiEndpoint = 'https://dv42w4b7l8.execute-api.eu-central-1.amazonaws.com/turnOn/turn_on'
+        function callQR(qr) {
+            const apiEndpoint = 'https://dv42w4b7l8.execute-api.eu-central-1.amazonaws.com/turnOn/turn_on';
             const url = `${apiEndpoint}?qr=${qr}&key=${accesKey}`;
             console.log(url);
             fetch(url)
-              .then(response => response.json())
-              .then(data => {
-                console.log(data);
-                var message = data["status"] + "\n"  + data["name"] + "\n" + data["company"] + "\n" + data["store"] + "\n" + data["duration"] + " saniye";
-                alert(message);
-              })
-              .catch(error => console.error(error));
-          }
-
-       function openCamera() {
-    const videoElement = document.getElementById('qr-video');
-    let track = null;
-
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            facingMode: 'environment' // Use 'user' for front camera, 'environment' for rear camera
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    var message = data["status"] + "\n"  + data["name"] + "\n" + data["company"] + "\n" + data["store"] + "\n" + data["duration"] + " saniye";
+                    alert(message);
+                })
+                .catch(error => console.error(error));
         }
-    })
-        .then(stream => {
-            videoElement.srcObject = stream;
 
-            track = stream.getVideoTracks()[0];
-            const imageCapture = new ImageCapture(track);
+        function openCamera() {
+            const videoElement = document.getElementById('qr-video');
+            let track = null;
 
-            function scanFrame() {
-                if (track.readyState === 'live') {
-                    imageCapture.grabFrame()
-                        .then(imageBitmap => {
-                            const canvas = document.createElement('canvas');
-                            canvas.width = imageBitmap.width;
-                            canvas.height = imageBitmap.height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(imageBitmap, 0, 0);
-
-                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                            const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                            if (code) {
-                                document.getElementById('qrInput').value = code.data;
-                                stream.getTracks().forEach(track => track.stop());
-                            }
-
-                            requestAnimationFrame(scanFrame);
-                        })
-                        .catch(error => {
-                            // Handle errors, e.g., log them to the console
-                            console.error('Error grabbing frame:', error);
-                            requestAnimationFrame(scanFrame);
-                        });
-                } else {
-                    console.warn('Video track is not in a live state.');
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'environment' // Use 'user' for front camera, 'environment' for rear camera
                 }
-            }
+            })
+                .then(stream => {
+                    videoElement.srcObject = stream;
 
-            requestAnimationFrame(scanFrame);
-        })
-        .catch(error => {
-            // Handle errors, e.g., log them to the console
-            console.error('Error accessing camera:', error);
-        });
-}
+                    track = stream.getVideoTracks()[0];
+                    const imageCapture = new ImageCapture(track);
 
+                    function scanFrame() {
+                        if (track.readyState === 'live') {
+                            imageCapture.grabFrame()
+                                .then(imageBitmap => {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = imageBitmap.width;
+                                    canvas.height = imageBitmap.height;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(imageBitmap, 0, 0);
 
+                                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                                    if (code) {
+                                        document.getElementById('qrInput').value = code.data;
+                                        stream.getTracks().forEach(track => track.stop());
+                                    }
+
+                                    requestAnimationFrame(scanFrame);
+                                })
+                                .catch(error => {
+                                    // Handle errors, e.g., log them to the console
+                                    console.error('Error grabbing frame:', error);
+                                    requestAnimationFrame(scanFrame);
+                                });
+                        } else {
+                            console.warn('Video track is not in a live state.');
+                        }
+                    }
+
+                    requestAnimationFrame(scanFrame);
+                })
+                .catch(error => {
+                    // Handle errors, e.g., log them to the console
+                    console.error('Error accessing camera:', error);
+                });
+        }
     </script>
 
 </body>
