@@ -29,8 +29,8 @@
   <body>
     <div class="button-container">
       
-      <button id="button1">TETİKLEME AYARLARI</button>
-      <button id="button2">MANUEL TEST</button>
+      <button id="button1" style="display: none;" >TETİKLEME AYARLARI</button>
+      <button id="button2 style="display: none;" ">MANUEL TEST</button>
       
       
     </div>
@@ -76,6 +76,8 @@
                     window.location.href = "login.html";
                     return;
                   }else{
+                    document.getElementById('button1').style.display = 'block';
+                    document.getElementById('button2').style.display = 'block';
                   company = result[3].getValue();
                   company2= result[2].getValue();
                   
