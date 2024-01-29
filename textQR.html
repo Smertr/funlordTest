@@ -52,6 +52,7 @@
         cognitoUser.getSession(function(err, session) {
               if (err) {
                 alert(err);
+                window.location.href = "login.html";
                 return;
               }
 
