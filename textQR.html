@@ -30,8 +30,63 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1"></script>
 
     <script>
+
         var accesKey ="";
         var qrText = "";
+
+
+
+        
+        var company = "";
+        var company2= "";
+
+
+        // Check the user info on AWS and get the details of user
+        var data = {
+            UserPoolId: 'eu-central-1_h13FspoLZ',
+            ClientId: '4hgt9obq0q5aets48ks53jn4m8'
+        };
+
+        var userPool    = new AmazonCognitoIdentity.CognitoUserPool(data);
+        var cognitoUser = userPool.getCurrentUser();
+
+        cognitoUser.getSession(function(err, session) {
+              if (err) {
+                alert(err);
+                return;
+              }
+
+
+              // Add the User's Id Token to the Cognito credentials login map.
+              AWS.config.region   = 'eu-central-1';
+              AWS.config.credentials  = new AWS.CognitoIdentityCredentials({
+                  IdentityPoolId: 'eu-central-1:0308e2a6-875e-4293-854e-0d434fb1987d',   
+                  Logins: {
+                    //'cognito-idp:us-east-1:793924894519:userpool/us-east-1_1uKtiajQH': session.getIdToken().getJwtToken()    
+                    'cognito-idp:eu-central-1:653216777256:userpool/eu-central-1_h13FspoLZ': session.getIdToken().getJwtToken()    
+                    
+                  }
+              });
+
+              cognitoUser.getUserAttributes(function(err, result) {
+                  if (err) {
+                    console.log(err);
+                    window.location.href = "login.html";
+                    return;
+                  }else{
+                  company = result[3].getValue();
+                  company2= result[2].getValue();
+                  
+                  console.log(result);
+                  }
+                 
+              });
+    
+        });
+
+
+
+
 
         function logQRText() {
             // Get the value from the input field
