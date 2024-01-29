@@ -41,8 +41,8 @@
 <body>
 
     <label for="qrInput">QR:</label>
-    <input type="text" id="qrInput" name="QR" placeholder="Enter text">
-    <button onclick="logQRText()">GÖNDER</button>
+    <input type="text" id="qrInput" style="display: none;" name="QR" placeholder="Enter text">
+    <button id= "button1" style="display: none;" onclick="logQRText()">GÖNDER</button>
 
     <!-- Container for the form -->
     <div id="formDataContainer"></div>
@@ -99,6 +99,8 @@
                     window.location.href = "login.html";
                     return;
                   }else{
+                    document.getElementById('qrInput').style.display = 'block';
+                    document.getElementById('button1').style.display = 'block';
                   company = result[3].getValue();
                   company2= result[2].getValue();
                   
