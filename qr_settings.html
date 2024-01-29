@@ -125,10 +125,46 @@
 
         // Add event listener for the update button
         document.getElementById('updateButton').addEventListener('click', function() {
+            const apiEndpoint = 'https://nklblhu512.execute-api.eu-central-1.amazonaws.com/qr/update';
+            const url = `${apiEndpoint}`;   //?ts=${timestamp}&company=${company}&site=${site}&type=${type}
+            var xhttp = new XMLHttpRequest();
+            
             var formData = getFormDataAsJSON();
             var confirmation = confirm("Are you sure you want to update the form?");
             if (confirmation) {
                 console.log(formData);
+
+
+                xhttp.open("POST",url, true);
+
+                xhttp.setRequestHeader('Content-Type','X-Amz-Date','Authorization','X-Api-Key','X-Amz-Security-Token'); // Set the content type to JSON
+                const requestBody = JSON.stringify(formData);
+
+                xhttp.onreadystatechange = function() {
+                        if (this.readyState === 4) {
+                                if (this.status === 200) {
+                                // Request completed successfully
+
+                                alert("Veriler Gönderildi");
+                                //window.location.href = "capacityForm.html";
+                                } else {
+                                // An error occurred
+
+                                alert("Hata Oluştu");
+                                }
+                        }
+                };
+                xhttp.send(requestBody); // Send the request body
+
+
+
+
+
+
+
+
+
+
             }
         });
 
